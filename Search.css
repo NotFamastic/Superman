@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Chewy&display=swap');
+* {
+    margin: 0;
+    letter-spacing: 2px;
+    user-select: none;
+    -webkit-user-drag: none;
+    font-family: "Chewy", serif;
+}
+
+body {
+    background-repeat: no-repeat; 
+    background-size: cover;
+    background-color: rgb(53, 53, 53) ;
+    color: rgb(255, 255, 255);
+    font-family: Arial, sans-serif;
+    position: relative;
+}
+
+#Top{
+    top:0;
+    left: 0;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100px;
+    width: 100%;
+    background-color: rgb(0, 0, 0);
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    z-index: 1000;
+}
+#Top h1{
+    align-content: center;
+    margin-right: 10%;
+    height: 50px;
+    width:  21.5%;
+}
+
+#Top input{
+    height: 50px;
+    width:  25%;
+    border-radius: 30px;
+    border: 5px solid rgb(0, 0, 0);
+    text-align: justify;
+    text-transform: capitalize;
+    padding-left: 15px;
+    margin-right: 1.5%;
+}
+#Top input:focus {
+    border: none;
+    outline: none;
+}
+
+#Top input::placeholder {
+    font-size: 15px;
+    padding-left: 5px;
+    color: #999; /* Optional: Add color for placeholder */
+}
+#Searchbtn{
+    height: 60px;
+    width: 3.5%;
+    margin-right: 25%;
+    border: solid black 5px; 
+    border-radius: 30px;
+    cursor: pointer;
+}
+#Searchbtn {
+    height: 60px;
+    width: 60px;
+    margin-right: 550px;
+    border: solid black 5px; 
+    border-radius: 30px;
+    cursor: pointer;
+}
+#Back {
+    width: 2.5%;
+    margin-right: 1%; 
+    padding-right: 10px;
+    border-radius: 30px;
+    border: none;
+    background-color: rgb(0, 0, 0);
+    cursor: pointer;
+}
+#Back img{
+    transform: rotate(180deg);
+    width: 80%; 
+    height: 40px;
+    transition: filter 0.5s ease;
+    filter: invert(1);
+}
+
+#Back:hover{
+    filter: invert(1);
+}
+#Back img:hover{
+    filter: invert(1);
+}
+#ButtonsDiv{
+    margin-top: 10%;
+}
+.btn{
+    cursor: pointer;
+    color: white;
+    padding-left: 10px;
+    text-align: start;
+    height: 50px;
+    width: 100%;
+    background-color: transparent;
+    border: none;
+}
+.btn:hover{
+    background-color: rgb(99, 99, 99);
+    border: #6b6a6a;
+}
+#Items{
+
+    margin-top: 150px;
+}

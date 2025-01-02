@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Hero</title>
+    <link rel="stylesheet" href="Style.css">
+</head>
+<body id="body">
+    <header id="Top">
+        <h1>My superhero gallery</h1>
+        <input type="text" placeholder="Search">
+        <button id="SearchButton">
+            <img height="21" width="" src="https://static.vecteezy.com/system/resources/previews/001/504/972/non_2x/search-icon-free-vector.jpg" alt="Search Icon">
+        </button>    
+    </header>
+
+    <section class="Superhero">
+        <div id="Left">
+            <img id="Image"alt="Batman" src="https://static.posters.cz/image/1300/art-photo/the-batman-2022-i122573.jpg" width="650" height="1000" >
+        <div id="controls">
+            <button id="Previous" ><img id='PreviousImg'src="https://cdn-icons-png.flaticon.com/512/32/32213.png"></button>
+            <h1 class="s" id="s1"></h1>
+            <h1 class="s" id="s2"></h1>
+            <h1 class="s" id="s3"></h1>
+            <button id="Next"><img id='NextImg'src="https://cdn-icons-png.flaticon.com/512/32/32213.png"></button>   
+        </div>
+        </div>
+        <div id="Details">
+            <h2 id="Name">Name-</h2>
+            <br>
+            <h2 id="RealName" style="display: none;">Real Name-</h2>
+            <br id="Br-2" style="display: none;">
+            <h2 id="Company">Made by -</h2>
+            <br>
+            <h2>Ablities</h2>
+            <ol id="Ablities">
+            </ol>
+            <br>
+            <h2 id="Description">Description -</h2>
+            <br>
+            <h2>Why my favorite -</h2>
+        </div>
+    </section>
+    <section id="other-stuff">
+     <div>
+        <h1>Articles</h1>
+        <a target="_blank" href="https://en.wikipedia.org/wiki/Batman">
+            <Button><h1>hi</h1><Img src='https://upload.wikimedia.org/wikipedia/en/c/c7/Batman_Infobox.jpg'></Button>
+        </a>
+    </div>
+    <div>
+      <h1>Game</h1>
+      <a target="_blank" href="https://en.wikipedia.org/wiki/Batman">
+        <Button><h1>hi</h1><Img src='https://upload.wikimedia.org/wikipedia/en/c/c7/Batman_Infobox.jpg'></Button>
+     </a>
+    </div>
+    <div>
+        <h1>Movies</h1>
+        <a target="_blank" href="https://en.wikipedia.org/wiki/Batman">
+            <Button><h1>hi</h1><Img src='https://upload.wikimedia.org/wikipedia/en/c/c7/Batman_Infobox.jpg'></Button>
+         </a>
+    </section>
+    <footer>
+        <h3>&copy; Made by Sankalp Das in 2024, </h3>
+    </footer>
+    <script>
+        // Function definition
+        function credits() {
+          console.log("© Made by Sankalp Das in 2024");
+          console.log("Accept terms and conditons.y()/n()");
+        }
+        function y(){
+            console.log('%cTerms Accepted!',"color:green")
+        }
+        function n(){
+            console.log('%cTerms Not Accepted?!?!',"color:Red")
+            console.log("Banned")
+            document.body.innerHTML = '';
+            const h1 = document.createElement("h1")
+            h1.textContent ="You Are Banned"
+            document.body.appendChild(h1)
+        }
+      </script>
+    <script src="Script.js" type="module"></script>
+</body>
+</html>
