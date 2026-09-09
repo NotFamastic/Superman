@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
   //data
   Data();
   //Page 1 Function
-  
+
 });
 //*
 async function Data() {
@@ -69,7 +69,7 @@ async function Data() {
       if (location.pathname.includes("Search.html")) {
         //Search button
         SuperHeroArray = data
-        
+
         const ButtonsDiv = document.getElementById('ButtonsDiv');
         const fragment = document.createDocumentFragment();
 
@@ -89,14 +89,15 @@ async function Data() {
           ButtonsDiv.appendChild(fragment);
         });
 
-        document.getElementById('Searchbtn').addEventListener("click",function(){
+        document.getElementById('Searchbtn').addEventListener("click", function (event) {
+          event.preventDefault(); // FIX: stop the wrapping <a> from reloading the page
           search()
         })
-        document.getElementById('Search').addEventListener("keydown", function(event) {
+        document.getElementById('Search').addEventListener("keydown", function (event) {
           if (event.key === "Enter") {
             search();
           }
-        });        
+        });
       }
     }
   });
@@ -108,29 +109,29 @@ async function Data() {
         const data = snapshot.val();
         Json.SuperHeros.SuperHero = data;
         SetData();
-          Previous.addEventListener('click', function () {
-            ImageSwitch('Previous')
-          })
-          Next.addEventListener('click', function () {
-            ImageSwitch('Next')
-          })
+        if (Previous) Previous.addEventListener('click', function () {
+          ImageSwitch('Previous')
+        })
+        if (Next) Next.addEventListener('click', function () {
+          ImageSwitch('Next')
+        })
       }
     });
   }
   else {
     SetData();
-      Previous.addEventListener('click', function () {
-        ImageSwitch('Previous')
-      })
-      Next.addEventListener('click', function () {
-        ImageSwitch('Next')
-      })
+    if (Previous) Previous.addEventListener('click', function () {
+      ImageSwitch('Previous')
+    })
+    if (Next) Next.addEventListener('click', function () {
+      ImageSwitch('Next')
+    })
   }
 
 }
 function SetData() {
   if (location.pathname.includes("index.html")) {
-  //!------------------------------------------------//
+    //!------------------------------------------------//
     //*BackGround
     if (Json?.SuperHeros?.SuperHero?.["Other-Data"]?.bg?.Image) {
       const url = Json.SuperHeros.SuperHero["Other-Data"].bg.Image;
@@ -139,14 +140,16 @@ function SetData() {
       Debbuger("Bg", 1);
     }
     //*Music
-    if(Json?.SuperHeros?.SuperHero?.["Other-Data"]?.Music)
+    if (Json?.SuperHeros?.SuperHero?.["Other-Data"]?.Music) {
+      // FIX: this block was previously un-braced, silently gating the Name check below on Music existing
+    }
     //Name
     if (SuperHero) {
       document.getElementById("Name").textContent = "Name - " + SuperHero;
     }
-    // Real name
-    if (Json?.SuperHeros?.SuperHero?.Data?.RealName) {
-      const text = Json.SuperHeros.SuperHero.Data.RealName;
+    // Real name -- FIX: Data -> Details (matches actual DB schema)
+    if (Json?.SuperHeros?.SuperHero?.Details?.RealName) {
+      const text = Json.SuperHeros.SuperHero.Details.RealName;
       const h2 = document.getElementById("RealName");
       const br = document.getElementById("Br-2")
       if (text !== 'none') {
@@ -160,18 +163,18 @@ function SetData() {
     } else {
       Debbuger("Real Name", 1);
     }
-    // Company
-    if (Json?.SuperHeros?.SuperHero?.Data?.Company) {
-      const text = Json.SuperHeros.SuperHero.Data.Company;
+    // Company -- FIX: Data -> Details
+    if (Json?.SuperHeros?.SuperHero?.Details?.Company) {
+      const text = Json.SuperHeros.SuperHero.Details.Company;
       document.getElementById("Company").textContent = "Made by- " + text;
     } else {
       Debbuger("Company", 1);
     }
-    // Abilities
-    if (Json?.SuperHeros?.SuperHero?.Data?.Ablities) {
-      const abilitiesArray = Array.isArray(Json.SuperHeros.SuperHero.Data.Ablities)
-        ? Json.SuperHeros.SuperHero.Data.Ablities
-        : Object.values(Json.SuperHeros.SuperHero.Data.Ablities);
+    // Abilities -- FIX: Data -> Details
+    if (Json?.SuperHeros?.SuperHero?.Details?.Ablities) {
+      const abilitiesArray = Array.isArray(Json.SuperHeros.SuperHero.Details.Ablities)
+        ? Json.SuperHeros.SuperHero.Details.Ablities
+        : Object.values(Json.SuperHeros.SuperHero.Details.Ablities);
 
       abilitiesArray.forEach((ability) => {
         const li = document.createElement("li");
@@ -181,9 +184,9 @@ function SetData() {
     } else {
       Debbuger("Ablities", 1);
     }
-    //Description
-    if (Json?.SuperHeros?.SuperHero?.Data?.Description){
-      const text = Json.SuperHeros.SuperHero.Data.Description
+    //Description -- FIX: Data -> Details
+    if (Json?.SuperHeros?.SuperHero?.Details?.Description) {
+      const text = Json.SuperHeros.SuperHero.Details.Description
       document.getElementById('Description').textContent = `Description- ${text}`
     }
   }
@@ -220,32 +223,38 @@ function ImageSwitch(button) {
   document.getElementById(`s${Index}`).style.height = '25px'
   document.getElementById(`s${Index}`).style.backgroundColor = 'White'
 
-  document.getElementById('Image').src = `${Json.SuperHeros.SuperHero.Data.Img[`Img-${Index}`]}`
+  // FIX: Data -> Details
+  document.getElementById('Image').src = `${Json.SuperHeros.SuperHero.Details.Img[`Img-${Index}`]}`
 }
-function search(){
-    const Word = document.getElementById('Search').value.trim().toLowerCase();
-    const SuperHero = document.querySelectorAll('#ButtonsDiv .Searchable');
+function search() {
+  const Word = document.getElementById('Search').value.trim().toLowerCase();
+  const heroButtons = document.querySelectorAll('#ButtonsDiv .Searchable'); // FIX: renamed from `SuperHero` to avoid shadowing the global SuperHero variable
+  let anyFound = false;
 
-    SuperHero.forEach(item => {
-        const content = item.textContent.toLowerCase();
-        const words = content.split(/\s+/);
-        const searchWords = Word.split(/\s+/);
+  heroButtons.forEach(item => {
+    const content = item.textContent.toLowerCase();
+    const words = content.split(/\s+/);
+    const searchWords = Word.split(/\s+/);
 
-        let found = false;
-        searchWords.forEach(searchWord => {
-            if (words.some(word => word.includes(searchWord))) {
-                found = true;
-            }
-        });
-
-        if (found || Word === '') {
-            item.closest('#ButtonsDiv').style.display = 'block';
-            document.getElementById('not-found').style.display = 'none';
-        } else {
-            item.closest('##ButtonsDiv').style.display = 'none';
-            document.getElementById('not-found').style.display = 'block';
-        }
+    let found = false;
+    searchWords.forEach(searchWord => {
+      if (words.some(word => word.includes(searchWord))) {
+        found = true;
+      }
     });
+
+    if (found || Word === '') {
+      item.style.display = 'block'; // FIX: was toggling the whole #ButtonsDiv container instead of the individual button
+      anyFound = true;
+    } else {
+      item.style.display = 'none'; // FIX: was '##ButtonsDiv' (invalid selector, silently did nothing)
+    }
+  });
+
+  const notFoundEl = document.getElementById('not-found');
+  if (notFoundEl) { // FIX: guard in case the element isn't present, so this can't throw
+    notFoundEl.style.display = anyFound ? 'none' : 'block';
+  }
 }
 function Switch(Page, name) {
   SuperHero = name
@@ -293,7 +302,7 @@ async function Debbuger(ErrorName, Type) {
     console.log(`Error for ${ErrorName} already exists, not logging again.`);
     return;
   }
-  if (typeof num == "Number") {
+  if (typeof num === "number") { // FIX: was "Number" (capital N) which typeof never returns -- this whole block never ran before
     num = 1 + num;
 
     if (Type === 1) {
@@ -317,5 +326,5 @@ async function Debbuger(ErrorName, Type) {
     }
   }
 }
-console.log("%cScript ended", "color: lightgreen"); 
-console.log("%cEnter Credits() to veiw additional info","color:grey")
+console.log("%cScript ended", "color: lightgreen");
+console.log("%cEnter Credits() to veiw additional info", "color:grey")
