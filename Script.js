@@ -37,8 +37,10 @@ let Json = {
   },
 };
 //*Global Variable
-//!var parameter = urlParams.get('hero')
-var SuperHero = 'Batman';
+// FIX: actually read the ?hero= param from the URL instead of always defaulting to Batman.
+// This is what makes clicking a result on Search.html show the right hero on index.html.
+const urlParams = new URLSearchParams(location.search);
+var SuperHero = urlParams.get('hero') ? decodeURIComponent(urlParams.get('hero')) : 'Batman';
 let SuperHeroArray = [];
 
 //*Events
@@ -90,7 +92,7 @@ async function Data() {
         });
 
         document.getElementById('Searchbtn').addEventListener("click", function (event) {
-          event.preventDefault(); // FIX: stop the wrapping <a> from reloading the page
+          event.preventDefault(); // stop the wrapping <a> from reloading the page
           search()
         })
         document.getElementById('Search').addEventListener("keydown", function (event) {
@@ -141,13 +143,15 @@ function SetData() {
     }
     //*Music
     if (Json?.SuperHeros?.SuperHero?.["Other-Data"]?.Music) {
-      // FIX: this block was previously un-braced, silently gating the Name check below on Music existing
+      // (Music data exists in the DB but there's no <audio> element / playback
+      // logic anywhere in the app yet -- this is an unimplemented feature, not
+      // something I've wired up here since there's no player in the markup.)
     }
     //Name
     if (SuperHero) {
       document.getElementById("Name").textContent = "Name - " + SuperHero;
     }
-    // Real name -- FIX: Data -> Details (matches actual DB schema)
+    // Real name
     if (Json?.SuperHeros?.SuperHero?.Details?.RealName) {
       const text = Json.SuperHeros.SuperHero.Details.RealName;
       const h2 = document.getElementById("RealName");
@@ -163,14 +167,14 @@ function SetData() {
     } else {
       Debbuger("Real Name", 1);
     }
-    // Company -- FIX: Data -> Details
+    // Company
     if (Json?.SuperHeros?.SuperHero?.Details?.Company) {
       const text = Json.SuperHeros.SuperHero.Details.Company;
       document.getElementById("Company").textContent = "Made by- " + text;
     } else {
       Debbuger("Company", 1);
     }
-    // Abilities -- FIX: Data -> Details
+    // Abilities
     if (Json?.SuperHeros?.SuperHero?.Details?.Ablities) {
       const abilitiesArray = Array.isArray(Json.SuperHeros.SuperHero.Details.Ablities)
         ? Json.SuperHeros.SuperHero.Details.Ablities
@@ -184,10 +188,68 @@ function SetData() {
     } else {
       Debbuger("Ablities", 1);
     }
-    //Description -- FIX: Data -> Details
+    //Description
     if (Json?.SuperHeros?.SuperHero?.Details?.Description) {
       const text = Json.SuperHeros.SuperHero.Details.Description
       document.getElementById('Description').textContent = `Description- ${text}`
+    }
+    // FIX: set the poster image (and its alt text) from the loaded hero's data on
+    // initial page load. Previously the hardcoded Batman <img> in index.html never
+    // got replaced until Next/Previous was clicked, so picking a different hero via
+    // Search still showed Batman's poster.
+    if (Json?.SuperHeros?.SuperHero?.Details?.Img?.["Img-1"]) {
+      const imgEl = document.getElementById('Image');
+      imgEl.src = Json.SuperHeros.SuperHero.Details.Img["Img-1"];
+      imgEl.alt = SuperHero;
+    } else {
+      Debbuger("Img", 1);
+    }
+
+    // FIX: the Articles / Game / Movies cards were hardcoded to Batman in the HTML
+    // and never read from the database, even though every hero record in Firebase
+    // has its own Details.Articles / Details.Games / Details.movies data. Wire them
+    // up so they actually reflect the selected hero.
+    // Articles
+    if (Json?.SuperHeros?.SuperHero?.Details?.Articles) {
+      const a = Json.SuperHeros.SuperHero.Details.Articles;
+      const link = document.getElementById('ArticleLink');
+      const title = document.getElementById('ArticleTitle');
+      const img = document.getElementById('ArticleImg');
+      if (link) link.href = a.Link || '#';
+      if (title) title.textContent = a.Title || 'Article';
+      if (img && a.Image?.Source) img.src = a.Image.Source;
+    } else {
+      Debbuger("Articles", 1);
+    }
+
+    // Games -- the DB stores this two ways for Batman (a nested "Game-1" entry
+    // plus duplicate flat fields), so prefer any "Game-*" child and fall back
+    // to the flat fields if there isn't one.
+    if (Json?.SuperHeros?.SuperHero?.Details?.Games) {
+      const gamesData = Json.SuperHeros.SuperHero.Details.Games;
+      const gameKey = Object.keys(gamesData).find((k) => k.startsWith('Game-'));
+      const g = gameKey ? gamesData[gameKey] : gamesData;
+      const link = document.getElementById('GameLink');
+      const title = document.getElementById('GameTitle');
+      const img = document.getElementById('GameImg');
+      if (link) link.href = g.Link || '#';
+      if (title) title.textContent = g.Title || 'Game';
+      if (img) img.src = typeof g.Image === 'string' ? g.Image : g.Image?.Source;
+    } else {
+      Debbuger("Games", 1);
+    }
+
+    // Movies
+    if (Json?.SuperHeros?.SuperHero?.Details?.movies) {
+      const m = Json.SuperHeros.SuperHero.Details.movies;
+      const link = document.getElementById('MovieLink');
+      const title = document.getElementById('MovieTitle');
+      const img = document.getElementById('MovieImg');
+      if (link) link.href = m.Link || '#';
+      if (title) title.textContent = m.Title || 'Movie';
+      if (img && m.Image?.Source) img.src = m.Image.Source;
+    } else {
+      Debbuger("Movies", 1);
     }
   }
 }
@@ -223,12 +285,11 @@ function ImageSwitch(button) {
   document.getElementById(`s${Index}`).style.height = '25px'
   document.getElementById(`s${Index}`).style.backgroundColor = 'White'
 
-  // FIX: Data -> Details
   document.getElementById('Image').src = `${Json.SuperHeros.SuperHero.Details.Img[`Img-${Index}`]}`
 }
 function search() {
   const Word = document.getElementById('Search').value.trim().toLowerCase();
-  const heroButtons = document.querySelectorAll('#ButtonsDiv .Searchable'); // FIX: renamed from `SuperHero` to avoid shadowing the global SuperHero variable
+  const heroButtons = document.querySelectorAll('#ButtonsDiv .Searchable');
   let anyFound = false;
 
   heroButtons.forEach(item => {
@@ -244,24 +305,26 @@ function search() {
     });
 
     if (found || Word === '') {
-      item.style.display = 'block'; // FIX: was toggling the whole #ButtonsDiv container instead of the individual button
+      item.style.display = 'block';
       anyFound = true;
     } else {
-      item.style.display = 'none'; // FIX: was '##ButtonsDiv' (invalid selector, silently did nothing)
+      item.style.display = 'none';
     }
   });
 
   const notFoundEl = document.getElementById('not-found');
-  if (notFoundEl) { // FIX: guard in case the element isn't present, so this can't throw
+  if (notFoundEl) {
     notFoundEl.style.display = anyFound ? 'none' : 'block';
   }
 }
 function Switch(Page, name) {
   SuperHero = name
   if (name !== null) {
-    location.href = `${Page}?hero=${name}`;
+    // FIX: encode the hero name so names containing spaces/special
+    // characters (e.g. "Iron Man") don't produce a broken URL/query string.
+    location.href = `${Page}?hero=${encodeURIComponent(name)}`;
   } else {
-    location.href = `${Page}?hero=${SuperHero}`
+    location.href = `${Page}?hero=${encodeURIComponent(SuperHero)}`
   }
 }
 
@@ -302,7 +365,7 @@ async function Debbuger(ErrorName, Type) {
     console.log(`Error for ${ErrorName} already exists, not logging again.`);
     return;
   }
-  if (typeof num === "number") { // FIX: was "Number" (capital N) which typeof never returns -- this whole block never ran before
+  if (typeof num === "number") {
     num = 1 + num;
 
     if (Type === 1) {
@@ -319,7 +382,12 @@ async function Debbuger(ErrorName, Type) {
       console.log("%cScript Paused", "color: Red")
       console.warn(`%c${ErrorName} is undefined at line: ${lineNumber}`, "color: orange");
       await update(ref(db, "Errors/num"), { num });
-      await push(ref(db, `Errors/Error${num}`), {
+      // FIX: was push(), which nests the error under a random auto-generated key
+      // (Errors/ErrorN/<randomId>/error) instead of Errors/ErrorN/error like the
+      // Type===1 branch above. That mismatch broke the existingErrors.some(...)
+      // duplicate check next time Debbuger ran, since error.error would be
+      // undefined on the push()'d entries. set() keeps the shape consistent.
+      await set(ref(db, `Errors/Error${num}`), {
         error: `Need fix: ${ErrorName} for ${SuperHero} at line: ${lineNumber}`,
         Date: new Date().toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", })
       });
